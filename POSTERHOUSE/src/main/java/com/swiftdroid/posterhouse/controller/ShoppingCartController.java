@@ -25,7 +25,6 @@ import com.swiftdroid.posterhouse.service.UserService;
 
 
 @Controller
-
 public class ShoppingCartController {
 	
 @Autowired
@@ -33,10 +32,12 @@ private UserService userService;
 
 @Autowired
 private CartItemService cartItemService;
+
 /*
 @Autowired
 private BookService bookService;
 */
+
 @Autowired
 private ShoppingCartService shoppingCartService;
 
@@ -95,7 +96,7 @@ public String addItem(
 	}
 	finally {
 
-		//System.out.println("ProductCofig ID :: "+productConfig.getId());
+		System.out.println("ProductCofig ID :: "+productConfig.getId());
 
 	System.out.println("*************************************************************11*********************************************");	
 		productConfig = productConfigService.findProducConfigtByID(productConfig.getId());
@@ -120,7 +121,8 @@ public String addItem(
 	}
 	
 	System.out.println("*************************************************************33*********************************************");	
-
+    System.out.println("productConfig::::"+productConfig);
+    
 	CartItem cartItem = cartItemService.addProductToCartItem(productConfig,product, user, Integer.parseInt(qty));
 	
 	model.addAttribute("addBookSuccess", true);
@@ -133,8 +135,13 @@ public String addItem(
 @RequestMapping("/updateCartItem")
 public String updateShoppingCart(
 		@ModelAttribute("id") Long cartItemId,
-		@ModelAttribute("qty") int qty
+		@ModelAttribute("qty") int qty,Model model
 		) {
+if(qty==0) {
+
+	model.addAttribute("qtyMsg", true);
+	return "forward:/cart";
+}
 	System.out.println("cartItemId::"+cartItemId);
 	CartItem cartItem = cartItemService.findById(cartItemId);
 	cartItem.setQty(qty);
@@ -146,9 +153,10 @@ public String updateShoppingCart(
 
 @RequestMapping("/removeItem")
 public String removeItem(@RequestParam("id") Long id) {
+	
 	cartItemService.removeCartItem(cartItemService.findById(id));
 	
-	return "forward:/shoppingCart/cart";
+	return "forward:/cart";
 }
 
 

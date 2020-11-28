@@ -25,6 +25,8 @@ public class ShoppingCartServiceIpml implements ShoppingCartService {
 	public ShoppingCart updateShoppingCart(ShoppingCart shoppingCart) {
 		// TODO Auto-generated method stub
 		BigDecimal cartTotal=new BigDecimal(0);
+		BigDecimal finalshippingPriceTotal=new BigDecimal(50);
+
 		
 		List<CartItem> cartItemList=cartItemService.findByShoppingCart(shoppingCart);		
 		System.out.println(cartItemList.size());
@@ -39,10 +41,26 @@ public class ShoppingCartServiceIpml implements ShoppingCartService {
 		System.out.println("fffffffffffffffffffffffffffffdffffffffffffffffffffffff"+cartTotal);
 		shoppingCart.setGrandTotal(cartTotal);
 		
-		
+		shoppingCart.setFinalShippingPriceTotal(cartTotal.add(finalshippingPriceTotal));
 		shoppingCartRepository.save(shoppingCart);
 		
 		return shoppingCart;
+	}
+
+	@Override
+	public void clearShoppingCart(ShoppingCart shoppingCart) {
+		// TODO Auto-generated method stub
+	List<CartItem> cartItemList = cartItemService.findByShoppingCart(shoppingCart);
+		
+		for (CartItem cartItem : cartItemList) {
+			cartItem.setShoppingCart(null);
+			cartItemService.saveCart(cartItem);
+		}
+		
+		shoppingCart.setGrandTotal(new BigDecimal(0));
+		
+		shoppingCartRepository.save(shoppingCart);
+	
 	}
 	
 	

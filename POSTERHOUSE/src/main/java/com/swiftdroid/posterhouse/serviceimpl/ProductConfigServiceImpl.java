@@ -1,5 +1,7 @@
 package com.swiftdroid.posterhouse.serviceimpl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,7 @@ public class ProductConfigServiceImpl  implements ProductConfigService{
 	
 	
 	@Override
-	public ProductConfig findProductConfigByProductId(Product product) {
+	public List<ProductConfig> findProductConfigByProductId(Product product) {
 		// TODO Auto-generated method stub
 		return productConfigRepository.findByproduct(product);
 	}
@@ -26,6 +28,21 @@ public class ProductConfigServiceImpl  implements ProductConfigService{
 	public ProductConfig findProducConfigtByID(long id) {
 		// TODO Auto-generated method stub
 		return productConfigRepository.findById(id).orElse(null);
+	}
+
+
+	@Override
+	public List<ProductConfig> findProductSize(long productId) {
+		return null;
+		// TODO Auto-generated method stub
+		//return productConfigRepository.findByproduct(productId)
+	}
+
+
+	@Override
+	public ProductConfig findProductConfigByProductAndSize(Product product, String size) {
+		// TODO Auto-generated method stub
+		return productConfigRepository.findProductConfigByProductAndsize(product, size);
 	}
 
 }

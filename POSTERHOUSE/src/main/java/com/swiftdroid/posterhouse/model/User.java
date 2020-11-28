@@ -73,13 +73,26 @@ public class User implements UserDetails {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
 	private List<UserShipping> userShippingList;
 	
-
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+	private List<UserBilling> userBilingList;
+	
+	
 	@OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
 	private ShoppingCart shoppingCart;
 	
-    
+	@OneToMany(mappedBy = "user")
+	private List<Order> orderList;
 	
 	
+	
+	public List<Order> getOrderList() {
+		return orderList;
+	}
+
+	public void setOrderList(List<Order> orderList) {
+		this.orderList = orderList;
+	}
+
 	public ShoppingCart getShoppingCart() {
 		return shoppingCart;
 	}
@@ -242,6 +255,14 @@ public class User implements UserDetails {
 		userRoles.forEach(ur -> authorites.add(new Authority(ur.getRole().getName())));
 		
 		return authorites;
+	}
+
+	public List<UserBilling> getUserBilingList() {
+		return userBilingList;
+	}
+
+	public void setUserBilingList(List<UserBilling> userBilingList) {
+		this.userBilingList = userBilingList;
 	}
     
     

@@ -17,7 +17,7 @@ public class CategoryServiceImpl implements CategoryService{
 	private CategoryRepository categoryRepository;
 	
 	@Override
-	public List<ProductType> findAllProduct() {
+	public List<ProductType> findAllProductType() {
 		// TODO Auto-generated method stub
 		return (List<ProductType>) categoryRepository.findAll();
 	}

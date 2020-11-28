@@ -20,11 +20,16 @@ public class ShoppingCart {
 	@Id
    	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	
 	private BigDecimal GrandTotal;
+	
+	private BigDecimal FinalShippingPriceTotal;
+
 	
 	@OneToMany(mappedBy="shoppingCart", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
 	@JsonIgnore
 	private List<CartItem> cartItemList;
+	
 	
 	@OneToOne(cascade = CascadeType.ALL)
 	private User user;
@@ -60,6 +65,17 @@ public class ShoppingCart {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
+	public BigDecimal getFinalShippingPriceTotal() {
+		return FinalShippingPriceTotal;
+	}
+
+	public void setFinalShippingPriceTotal(BigDecimal finalShippingPriceTotal) {
+		FinalShippingPriceTotal = finalShippingPriceTotal;
+	}
+	
+	
+	
 	
 	
 }

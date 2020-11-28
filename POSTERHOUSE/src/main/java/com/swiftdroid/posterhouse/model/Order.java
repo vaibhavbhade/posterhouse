@@ -1,6 +1,7 @@
 package com.swiftdroid.posterhouse.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -28,17 +29,24 @@ public class Order {
 	private String shippingMethod;
 	private String orderStatus;
 	private BigDecimal orderTotal;
+	private LocalDate estimateDate;
+	private BigDecimal finalPrice;
+	
 	
 	@OneToMany(mappedBy = "order", cascade=CascadeType.ALL )
 	private List<CartItem> cartItemList;
 	
 	
 	
-	  @OneToOne(cascade=CascadeType.ALL) private ShippingAddress shippingAddress;
+	  @OneToOne
+	  (cascade=CascadeType.ALL)
+	  private ShippingAddress shippingAddress;
 	 
 	
 	
-	  @OneToOne(cascade=CascadeType.ALL) private BillingAddress billingAddress;
+	  @OneToOne
+	  (cascade=CascadeType.ALL) 
+	  private BillingAddress billingAddress;
 	 
 	
 	
@@ -50,6 +58,7 @@ public class Order {
 	private User user;
 
 
+	
 	public Long getId() {
 		return id;
 	}
@@ -127,6 +136,46 @@ public class Order {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+
+	public ShippingAddress getShippingAddress() {
+		return shippingAddress;
+	}
+
+
+	public void setShippingAddress(ShippingAddress shippingAddress) {
+		this.shippingAddress = shippingAddress;
+	}
+
+
+	public BillingAddress getBillingAddress() {
+		return billingAddress;
+	}
+
+
+	public void setBillingAddress(BillingAddress billingAddress) {
+		this.billingAddress = billingAddress;
+	}
+
+
+	public LocalDate getEstimateDate() {
+		return estimateDate;
+	}
+
+
+	public void setEstimateDate(LocalDate estimateDate) {
+		this.estimateDate = estimateDate;
+	}
+
+
+	public BigDecimal getFinalPrice() {
+		return finalPrice;
+	}
+
+
+	public void setFinalPrice(BigDecimal finalPrice) {
+		this.finalPrice = finalPrice;
 	}
 	
 	

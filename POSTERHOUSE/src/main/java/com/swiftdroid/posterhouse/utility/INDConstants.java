@@ -36,9 +36,9 @@ public class INDConstants {
 
 				put("HR","Haryana");
 
-				put("HP","Himachal Pradesh	");
+				put("HP","Himachal Pradesh");
 
-				put("JK","Jammu and Kashmir	");
+				put("JK","Jammu and Kashmir");
 
 				put("JH","Jharkhand");
 
@@ -48,7 +48,7 @@ public class INDConstants {
 
 				put("LD","Lakshadweep");
 
-				put("MP","Madhya Pradesh	");
+				put("MP","Madhya Pradesh");
 
 				put("MH","Maharashtra");
 
@@ -70,7 +70,6 @@ public class INDConstants {
 
 				put("SK","Sikkim");
 
-				put("TN","");
 				put("TG","Telangana ");
 				put("TR","Tripura ");
 				put("UP","Uttar Pradesh	 ");

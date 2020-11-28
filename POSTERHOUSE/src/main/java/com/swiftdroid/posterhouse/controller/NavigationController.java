@@ -5,20 +5,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +47,10 @@ import com.swiftdroid.posterhouse.service.ProductConfigService;
 import com.swiftdroid.posterhouse.service.ProductService;
 import com.swiftdroid.posterhouse.service.UserService;
 import com.swiftdroid.posterhouse.service.UserShippingService;
+import com.swiftdroid.posterhouse.serviceimpl.UserSecurityService;
 import com.swiftdroid.posterhouse.utility.INDConstants;
+import com.swiftdroid.posterhouse.utility.MailConstructor;
+import com.swiftdroid.posterhouse.utility.SecurityUtility;
 
 @Controller
 public class NavigationController {
@@ -50,6 +61,8 @@ public class NavigationController {
 	@Autowired
 	private UserShippingService userShippingService;
 	
+	@Autowired
+	private UserSecurityService userSecurityService;
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -63,32 +76,117 @@ public class NavigationController {
 	
 	@Autowired
 	private ProductConfigService productConfigService;
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	@Autowired
+	private MailConstructor mailConstructor;
+	
+
+	
+
+	
+    @GetMapping("/fetchProductBysizeandproductId")
+	public String getProductsizeAndProductWise(@RequestParam("productId") long producttId,@RequestParam("size")String size,Model model) {
+
+	Product product=productService.findProductById(producttId);
+		ProductConfig productConfig=productConfigService.findProductConfigByProductAndSize(product,size);
+		//ProductConfig productConfig=null;
+		model.addAttribute("categoryId", product.getProductType().getId());
+	     model.addAttribute("categoryName", product.getProductType().getProductTypeName());
+		
+		ProductType productType=categoryService.findCategoryById(product.getProductType().getId());//fetch category by cat id
+		
+	List<ProductConfig> productConfigList=productConfigService.findProductConfigByProductId(product);
+		
+		//ProductConfig productConfig=productConfigList.get(0);
+		
+		List<String> sizeList=new ArrayList<>();
+	
+		
+		for (ProductConfig productConfigdata : productConfigList) {
+			sizeList.add(productConfigdata.getSize());
+		}
+	
+		
+		System.out.println("productId::"+producttId);
+		System.out.println("size:: "+size);
+		System.out.println(productConfig.toString());
+		
+		model.addAttribute("productConfig", productConfig);
+		
+		model.addAttribute("productType", productType);
+		
+		model.addAttribute("product",product);
+		
+		
+		List<Integer> qtyList=Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+
+//		List<ProductConfig> sizeList=productConfigService.findProductSize(product.getId());
+		
+		System.out.println("#########################################################################");
+		System.out.println(sizeList.size());
+		
+		model.addAttribute("qtyList", qtyList);
+
+		model.addAttribute("sizeList", sizeList);
+	//	model.addAttribute("size",sizeList.get(0));
+		model.addAttribute("qty", 1);
+		
+		return "single-product";
+	
+	}
+	
+
+	
+	
+	
+	
+	
+	
+	
 	
 	@RequestMapping("/fetchProduct")
 	public String getAllproduct(Model model) {
 		
-		List<Long> catCount=new ArrayList<>();
-		List<ProductType> categoryList=categoryService.findAllProduct();
+	//List<Long> catCount=new ArrayList<>();//category count
+	Map<Long, ProductType> catCount = new HashMap<Long, ProductType>(); 
+	
+		
+		List<ProductType> categoryList=categoryService.findAllProductType();
 		for (ProductType productType : categoryList) {
 			
 		      System.out.println("count ::    "+productType.getProductTypeName()+"  :" +      productService.countProductCatIdWise(productType.getId()));
-		      catCount.add(productService.countProductCatIdWise(productType.getId()));
-		    //  catCount.addAll(productType.getId(), productService.countProductCatIdWise(productType.getId()));
+		    catCount.put(productService.countProductCatIdWise(productType.getId()),productType);
+		     
 		}
+		
+		
       List<Product> productList =productService.getAllProduct();
 		
       
       model.addAttribute("catgoryCountList",catCount);
 		model.addAttribute("productList", productList);
-		model.addAttribute("categoryList", categoryList);
+	//	model.addAttribute("categoryList", categoryList);
 		return "category";
 			
 	}
 	
 	@RequestMapping("/fetchProductCategoryWise")
 	public String fetchProductCategoryWise(Model model,@RequestParam("id")Long id  ) {
+
+		Map<Long, ProductType> catCount = new HashMap<Long, ProductType>(); 
+
+		List<ProductType> categoryList=categoryService.findAllProductType();
+	
 		
-		List<ProductType> categoryList=categoryService.findAllProduct();
+		for (ProductType productType : categoryList) {
+			
+		      System.out.println("count ::    "+productType.getProductTypeName()+"  :" +      productService.countProductCatIdWise(productType.getId()));
+		    catCount.put(productService.countProductCatIdWise(productType.getId()),productType);
+		     
+		}
+	
 		
 		ProductType productType=categoryService.findCategoryById(id);
 		
@@ -96,19 +194,22 @@ public class NavigationController {
         List<Product> productList =productService.getProductCategoryWise(productType);
       
         System.out.println(productList.isEmpty());
-        if(productList.isEmpty()) {
+        if(productList.isEmpty()) 
+        {
         	model.addAttribute("emptyProductList", true);
         }
         		
         
         
         
-        
+        model.addAttribute("catgoryCountList",catCount);
         model.addAttribute("productList", productList);
 		model.addAttribute("categoryList", categoryList);
 		return "category";
 			
 	}
+	
+	
 	@RequestMapping("/productDetail")
 	public String BookDetails(Model model,Principal principal,@PathParam("id") Long id,Authentication authentication ) {
 		
@@ -128,23 +229,31 @@ public class NavigationController {
 		
 		
 		
-		System.out.println("Category id :=  "+product.getProductType().getId());
+		//System.out.println("Category id :=  "+product.getProductType().getId());
 		
 		model.addAttribute("categoryId", product.getProductType().getId());
 		
-		System.out.println("caregory name="+ product.getProductType().getProductTypeName());
+		//System.out.println("caregory name="+ product.getProductType().getProductTypeName());
 		
 		model.addAttribute("categoryName", product.getProductType().getProductTypeName());
 		
 		ProductType productType=categoryService.findCategoryById(product.getProductType().getId());//fetch category by cat id
 		
-		ProductConfig productConfig=productConfigService.findProductConfigByProductId(product);
+		List<ProductConfig> productConfigList=productConfigService.findProductConfigByProductId(product);
 		
-		System.out.println("product con Id:::"+product.getId());
+		ProductConfig productConfig=productConfigList.get(0);
+		
+		List<String> sizeList=new ArrayList<>();
+	
+		
+		for (ProductConfig productConfigdata : productConfigList) {
+			sizeList.add(productConfigdata.getSize());
+		}
+		//System.out.println("product con Id:::"+product.getId());
 
-		System.out.println("productConfig con Id:::"+productConfig.getId());
+		//System.out.println("productConfig con Id:::"+productConfig.getId());
 
-		System.out.println(productConfig.toString());
+		//System.out.println(productConfig.toString());
 		
 		model.addAttribute("productConfig", productConfig);
 		
@@ -152,10 +261,18 @@ public class NavigationController {
 		
 		model.addAttribute("product",product);
 		
+		
 		List<Integer> qtyList=Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+
+//		List<ProductConfig> sizeList=productConfigService.findProductSize(product.getId());
+		
+		System.out.println("#########################################################################");
+		System.out.println(sizeList.size());
 		
 		model.addAttribute("qtyList", qtyList);
-		
+
+		model.addAttribute("sizeList", sizeList);
+	//	model.addAttribute("size",sizeList.get(0));
 		model.addAttribute("qty", 1);
 		
 		return "single-product";
@@ -264,7 +381,7 @@ public class NavigationController {
 		model.addAttribute("listOfCreditCards", true);
 		model.addAttribute("listOfShippingAddresses", true);
 		
-		List<String> stateList = INDConstants.listOfIndianStateCodes;
+		List<String> stateList = INDConstants.listOfIndianStateName;
 		Collections.sort(stateList);
 		model.addAttribute("stateList", stateList);
 		model.addAttribute("classActiveEdit", true);
@@ -272,7 +389,42 @@ public class NavigationController {
 		return "myProfile";
 		}
 	}
+	@RequestMapping("/forgetPassword")
+	public  String forgetPassword(Model model,@RequestParam("email")String email,HttpServletRequest request){
 		
+		model.addAttribute("classActiveForgetPassword", true);
+		
+		User user=userService.findByEmail(email);
+		
+		if(user == null) {
+			model.addAttribute("emailNotExists",true);
+			return "login";
+		}
+		
+String password=SecurityUtility.randomPassword();
+		
+		String encryptedPassword=passwordEncoder.encode(password);
+		
+		user.setPassword(encryptedPassword);
+		
+		userService.save(user);
+		try {
+		mailSender.send(mailConstructor.constructPasswordEmail(user, password, Locale.ENGLISH));
+		}catch (Exception e) {
+			// TODO: handle exception
+			model.addAttribute("forgetPasswordEmailSent", false);
+
+			return "badRequestPage";
+		}
+
+
+		model.addAttribute("forgetPasswordEmailSent", true);
+		
+		return "login";
+		
+	}
+
+	
 	
 	
 	@RequestMapping(value="/addNewShippingAddress", method=RequestMethod.POST)
@@ -331,7 +483,7 @@ public class NavigationController {
 		
 		model.addAttribute("userShipping", userShipping);
 		
-		List<String> stateList = INDConstants.listOfIndianStateCodes;
+		List<String> stateList = INDConstants.listOfIndianStateName;
 		Collections.sort(stateList);
 		model.addAttribute("stateList", stateList);
 		//model.addAttribute("userPaymentList", user.getUserPaymentList());
@@ -402,7 +554,7 @@ public class NavigationController {
 			
 			model.addAttribute("userShipping", userShipping);
 			
-			List<String> stateList = INDConstants.listOfIndianStateCodes;
+			List<String> stateList = INDConstants.listOfIndianStateName;
 			Collections.sort(stateList);
 			model.addAttribute("stateList", stateList);
 			
@@ -488,6 +640,67 @@ public class NavigationController {
 		}
 			}
 }
+	
+	@RequestMapping(value="/updateUserInfo", method=RequestMethod.POST)
+	public String updateUserInfo(
+			@ModelAttribute("user") User user,
+			@ModelAttribute("newPassword") String newPassword,
+			Model model
+			) throws Exception {
+		
+		User currentUser = userService.findById(user.getId());
+		
+		if(currentUser == null) {
+			throw new Exception ("User not found");
+		}
+		
+		/*check email already exists*/
+		if (userService.findByEmail(user.getEmail())!=null) {
+			if(userService.findByEmail(user.getEmail()).getId() != currentUser.getId()) {
+				model.addAttribute("emailExists", true);
+				return "myProfile";
+			}
+		}
+		
+		/*check username already exists*/
+		if (userService.findByUsername(user.getUsername())!=null) {
+			if(userService.findByUsername(user.getUsername()).getId() != currentUser.getId()) {
+				model.addAttribute("usernameExists", true);
+				return "myProfile";
+			}
+		}
+		
+//		update password
+		if (newPassword != null && !newPassword.isEmpty() && !newPassword.equals("")){
+			//BCryptPasswordEncoder passwordEncoder = SecurityUtility.passwordEncoder();
+				currentUser.setPassword(passwordEncoder.encode(newPassword));
+				
+		}else{
+			model.addAttribute("incorrectPassword", true);
+		    return "myProfile";
+		}
+		currentUser.setFirstName(user.getFirstName());
+		currentUser.setLastName(user.getLastName());
+		currentUser.setUsername(user.getUsername());
+		currentUser.setEmail(user.getEmail());
+		
+		userService.save(currentUser);
+		
+		model.addAttribute("updateSuccess", true);
+		model.addAttribute("user", currentUser);
+		model.addAttribute("classActiveEdit", true);
+		
+		UserDetails userDetails = userSecurityService.loadUserByUsername(currentUser.getUsername());
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
+				userDetails.getAuthorities());
+		
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		model.addAttribute("orderList", user.getOrderList());
+		
+		return "myProfile";
+	}
+
 }
 
 

@@ -35,10 +35,10 @@ public class CartItemServiceImpl  implements CartItemService
 	@Override
 	public CartItem updateCartItem(CartItem cartItem) {
 		BigDecimal bigDecimal=new BigDecimal(cartItem.getProductConfig().getPricePerQty()).multiply(new BigDecimal(cartItem.getQty()));
-		
+		BigDecimal finalbigDecimal=new BigDecimal(50);
 		bigDecimal =bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP);
 		 cartItem.setSubtotal(bigDecimal);
-		 cartItemRepository.save(cartItem);
+          cartItemRepository.save(cartItem);
 		 return cartItem;
 	}
 
@@ -48,7 +48,7 @@ public class CartItemServiceImpl  implements CartItemService
 		  List<CartItem> cartItemList = findByShoppingCart(user.getShoppingCart());
 			
 			for (CartItem cartItem : cartItemList) {
-				if(product.getId() == cartItem.getProduct().getId()) {
+				if(productConfig.getId() == cartItem.getProductConfig().getId()) {
 					cartItem.setQty(cartItem.getQty()+qty);
 					cartItem.setSubtotal(new BigDecimal(productConfig.getPricePerQty()).multiply(new BigDecimal(qty)));
 					cartItemRepository.save(cartItem);
@@ -63,7 +63,8 @@ public class CartItemServiceImpl  implements CartItemService
 			CartItem cartItem = new CartItem();
 			
 			cartItem.setShoppingCart(user.getShoppingCart());
-			
+			cartItem.setSize(productConfig.getSize());
+	
 			cartItem.setProduct(product);
 			
 		    cartItem.setProductConfig(productConfig);
@@ -71,6 +72,8 @@ public class CartItemServiceImpl  implements CartItemService
 			cartItem.setQty(qty);
 			
 			cartItem.setSubtotal(new BigDecimal(productConfig.getPricePerQty()).multiply(new BigDecimal(qty)));
+			
+			
 			        
 			cartItem = cartItemRepository.save(cartItem);
             
@@ -102,6 +105,12 @@ public class CartItemServiceImpl  implements CartItemService
 		// TODO Auto-generated method stub
 		productToCartItemRepository.deleteByCartItem(cartItem);
 		cartItemRepository.delete(cartItem);
+	}
+
+	@Override
+	public void saveCart(CartItem cartItem) {
+		// TODO Auto-generated method stub
+		cartItemRepository.save(cartItem);
 	}
 
 

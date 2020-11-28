@@ -45,7 +45,7 @@ return encoder;
 		 "/js/**",
 		 "/img/**",
 		 "/shoppingCart",
-
+"/fetchProductBysizeandproductId",
 		 "/","/productDetail",
 		 "/registration",
 		 "/fetchProduct","/fetchProductCategoryWise",

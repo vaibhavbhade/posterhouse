@@ -161,4 +161,10 @@ return localUser;
 			}
 	}
 
+	@Override
+	public User findById(Long id) {
+		// TODO Auto-generated method stub
+		return userRepository.findById(id).orElse(null);
+	}
+
 }

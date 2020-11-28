@@ -22,6 +22,7 @@ public class CartItem {
 	private Long id;
 	private int qty;
 	private BigDecimal subtotal;
+	private String size;
 	
 	@OneToOne
 	private Product Product;
@@ -41,6 +42,7 @@ public class CartItem {
 	@JoinColumn(name="order_id")
 	private Order order;
 
+	
 	public CartItem() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -114,6 +116,18 @@ public class CartItem {
 
 	public void setOrder(Order order) {
 		this.order = order;
+	}
+
+
+
+	public String getSize() {
+		return size;
+	}
+
+
+
+	public void setSize(String size) {
+		this.size = size;
 	}
 	
 	

@@ -61,6 +61,11 @@ public class Product implements Serializable {
 	@Column(name = "QT")
 	private int maximumQuantity;
 	
+	@Column(name="IPC")
+	private double listPrice;
+	
+	@Column(name="OPC")
+	private double ourPrice;
 	
 	@Column(name = "ia")
 	private boolean isEnable=true;
@@ -207,6 +212,23 @@ public List<ProductToCartItem> getProductToCartItemList() {
 		ProductToCartItemList = productToCartItemList;
 	}
 
+	public double getListPrice() {
+		return listPrice;
+	}
+
+	public void setListPrice(double listPrice) {
+		this.listPrice = listPrice;
+	}
+
+	public double getOurPrice() {
+		return ourPrice;
+	}
+
+	public void setOurPrice(double ourPrice) {
+		this.ourPrice = ourPrice;
+	}
+
+	
 	
 	
 	
